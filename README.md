@@ -1,6 +1,9 @@
-`Updater` sẽ sử dụng api để kiểm tra và tải thư mục đã nén từ `server` về thư mực của phần mềm đang hoạt động.  
+`Updater` sẽ sử dụng api để kiểm tra và tải thư mục đã nén từ `server` về thư mục của phần mềm đang hoạt động.  
 
-![File zip chứa các mục có sự thay đổi](assets/image/zip.png)
+![Giao diện phần mềm updater](code/assets/image/gui_Updater.png)
+
+Ví dụ về tệp tin nén cần tải từ server, các file có sự thay đổi sẽ nén lại vào 1 tệp.  
+![File zip chứa các mục có sự thay đổi](code/assets/image/zip.png)
 
 Các thông tin cần thiết cung cấp cho `Updater` sẽ là 1 file json nằm ở thư mục `data/config.json` với nội dung:  
 
@@ -38,7 +41,7 @@ Các thông tin cần thiết cung cấp cho `Updater` sẽ là 1 file json nằ
 
 LƯU Ý: CHƯƠNG TRÌNH CHÍNH (MAIN_APP_NAME) VÀ CHƯƠNG TRÌNH CẬP NHẬT (UPDATER) PHẢI NẰM CÙNG THƯ MỤC  
 
-![Updater cho phần mềm smartparking](assets/image/updater_for_smartparking.png)
+![Updater cho phần mềm smartparking](code/assets/image/updater_for_smartparking.png)
 
 Như ví dụ này thì phần mềm `Updater` sẽ chịu trách nhiệm cập nhật phần mềm cho phần mềm `smartparking`  
 Đoạn code dưới đây được gọi từ chương trình chính, nó sẽ chạy một luồng riêng, để không ảnh hưởng đến luồng chính của phần mềm `smartparking`  
@@ -73,7 +76,7 @@ def launch_updater(self):
     # print(updater_path) # D:\Project\Smart_Parking_Sensor\updater.exe
     if os.path.exists(updater_path):
         self.on_closing()
-        
+
         # Mở chạy phần mềm cập nhật
         subprocess.Popen([updater_path])
         

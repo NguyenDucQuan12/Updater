@@ -35,25 +35,29 @@ logger.setLevel(logging.INFO)
 with open(json_filename, 'r') as inside:
     data = json.load(inside)
 
-    # Cấu hình API
+    # Địa chỉ API để truy vấn
     API_SERVER = data['Update_app']["server"]
     LATEST_VERSION_ENDPOINT = data['Update_app']["api_get_version"]
+    # Tên phần mềm cần cập nhật
     MAIN_APP = data['Update_app']["main_app_name"]
+    # Tên thư mục tạm
     UPDATE_ZIP_NAME = data['Update_app']["update_zip_name"]
+    # Phiên bản hiện tại của phần mềm cần cập nhật
     CURRENT_VERSION = data['Update_app']["current_version"]
 
 
 # Đường dẫn ứng dụng chính
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 APP_EXE_PATH = os.path.join(APP_DIR, MAIN_APP)
+# Đường dẫn đến thư mục tạm, là thư mục chứa file zip để tải về, xong sẽ tự xóa
 UPDATE_ZIP_PATH = os.path.join(APP_DIR, UPDATE_ZIP_NAME)
 
 # @main_requires_admin
 class UpdateApp:
     """
-    Ứng dụng cập nhật phần mềm cho một `ứng dụng khác`, cần đặt ứng dụng này cùng vị trí với ứng dụng chính  
+    Ứng dụng cập nhật phần mềm cho một `ứng dụng khác`, cần đặt ứng dụng này cùng vị trí thư mục với ứng dụng chính  
     Khi ứng dụng chính được cài đặt trong thư mục `Program Files` trên `Windows`, việc ghi đè tệp trong thư mục này yêu cầu quyền quản trị viên, vì vậy cần chạy ứng dụng này với quyền quản trị viên  
-    Phần mềm này `(updater)` sẽ được phần mềm chính gọi và chạy trong nền để kiểm tra xem có bản cập nhật nào mới từ server hay không  
+    Phần mềm này `(updater)` sẽ được phần mềm chính gọi khi có bản cập nhật mới từ server  
     `Updater` sẽ truy vấn thông tin từ thư mục `data/config.json` để lấy các thông tin cần thiết và tải về một tệp `zip` chứa `file exe`, `thư mục`, `tệp tin` khác cần thiết để thay thế cho các tệp tin cũ  
     Sau khi `ghi đè` các tệp tin cũ thì `Updater` tự động xóa tệp zip đã tải về và khởi chạy phần mềm chính   
     """
@@ -62,9 +66,11 @@ class UpdateApp:
         self.root.title("Cập nhật phần mềm")
         self.root.iconbitmap("assets/image/Update_ico.ico")
         self.root.geometry("500x300")
+        # Không cho người dùng thay đổi kích thước phần mềm
         self.root.resizable(False, False)
 
-        self.current_version =current_version
+        # Lấy phiên bản hiện tại của phần mềm
+        self.current_version = current_version
 
         # Các thành phần giao diện
         self.file_label = tk.Label(root, text="File: Chưa tải", font=("Arial", 10))
@@ -284,9 +290,6 @@ if __name__ == "__main__":
     if __name__ == "__main__":
         main()
     """
-    # root = tk.Tk()
-    # app = UpdateApp(root, current_version= CURRENT_VERSION)
-    # root.mainloop()
 
     """
     Cách 2: Gọi trực tiếp quyền admin ngay từ ban đầu. Kiểm tra xem phần mềm có chạy với quyền admin không, nếu không thì chạy lại với quyền admin
