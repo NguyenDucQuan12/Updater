@@ -91,7 +91,7 @@ Sau khi hoàn thành thì vào thư mục `output` tương ứng sẽ thấy m�
 ## 0. Không thêm tệp vào exe
 Có một số trường hợp ta không nên sử dụng `Additional Files`:  
 Chúng ta có 1 tệp `json` chứa các thiết lập ban đầu như `địa chỉ api`, ` tên phần mềm`, ... đây là những thông số có thể thay đổi thường xuyên, vì vậy ta không thêm nó trực tiếp vào exe, mà để nớ ở cùng thư mục exe để nó dễ dàng truy cập và ta cũng dễ dàng chỉnh sửa tệp này.  
-Khi đó ta sẽ không sử dụng hàm `resource_path` để đọc tệp tin mà sẽ đọc trực tiếp, còn các file khác mà cần thì vẫn đọc bằng `resoucer_path` như bình thường và `phair thêm vào additon file`:  
+Khi đó ta sẽ không sử dụng hàm `resource_path` để đọc tệp tin mà sẽ đọc trực tiếp, còn các file khác mà cần thì vẫn đọc bằng `resource_path` như bình thường và `phải thêm vào additon file`:  
 
 ```python
 json_filename = "data\\config.json"

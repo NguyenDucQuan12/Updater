@@ -1,3 +1,9 @@
+# Cách tạo phần mềm cập nhật phần mềm và đóng gói các tệp python thành EXE
+
+## Cách đóng gói tệp python thành EXE xem ở phần code
+
+## Cách tạo phần mềm cập nhật phần mềm
+
 `Updater` sẽ sử dụng api để kiểm tra và tải thư mục đã nén từ `server` về thư mục của phần mềm đang hoạt động.  
 
 ![Giao diện phần mềm updater](code/assets/image/gui_Updater.png)
