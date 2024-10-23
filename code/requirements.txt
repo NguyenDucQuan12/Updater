@@ -2,3 +2,4 @@ pyuac==0.0.3
 pypiwin32==223
 auto-py-to-exe==2.44.2
 pyinstaller==6.11.0
+psutil==6.1.0
