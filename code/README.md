@@ -2,17 +2,83 @@
 
 Để đóng gói python thành một ứng dụng `exe` ta có thể sử dụng `auto py to exe`. Tìm hiểu thêm tại [Trang chủ](https://github.com/brentvollebregt/auto-py-to-exe).  
 Cài đặt thư viện bằng cách chạy lệnh sau:  
-```
+```python
 pip install auto-py-to-exe
 ```
 Sau khi cài đặt thư viện thì tiến hành khởi chạy ứng dụng bằng câu lệnh:  
-```
+```python
 auto-py-to-exe
 ```
+Đây là giao diện của auto-py-to-exe  
 
 ![Giao diện auto py to exe](assets/image/auto_py_to_exe.png)
 
-Sau đó `import` tệp json đã được chuẩn bị sẵn [tại đây](data/auto-py-to-exe-updater.json)  
+Tiếp theo ta sẽ chọn các thông tin cần thiết để cung cấp cho phần mềm:  
+`Script Location`: Là tệp tin chính của chúng ta, thường sẽ là `main.py`  
+`Onefile`: Nên chọn chế độ `onefile` để nó đóng gói thành 1 tệp exe  
+`Console window`: Chọn `Window Based` để ẩn đi cửa sổ console nếu phần mềm của mình đã có giao diện  
+`Icon`: Đường dẫn đến hình ảnh icon của phần mềm, lưu ý phải là file đuôi `ICO`  
+`Additional File`: Thêm các file cần thiết cho phần mềm như `hình ảnh`, tệp `json`, thường là cấc tệp tin không thay đổi liên tục trong phần mềm.  
+
+![Điền thông tin vào auto py to exe](assets/image/add_file_to_auto_py_to_exe.png)
+
+## Lưu ý trong việc Additional Files
+
+TRong chương trình này, chúng ta sử dụng các file: `data\\config.json`, `data\\log.txt `, `assets\\image\\Update_ico.ico `  
+
+```python
+json_filename = "data\\config.json"
+txt_log = "data\\log.txt"
+self.root.iconbitmap("assets\\image\\Update_ico.ico")
+
+```
+
+Khi đóng gói phần mềm bằng `pyinstall` và khởi chạy phần mềm thì chương trình của chúng ta không chạy ở thư mục chứa file `exe`, mà nó sẽ tạo ra 1 thư mục tạm có tên `_MEIxxxx` và chạy ở đấy.  
+
+![Chạy chương trình sau khi đóng goi](assets/image/run_program_in_mei_folder.png)
+
+Từ ảnh trên có thể thấy, thư mục chứa tệp `exe` là nằm ở `Program File (x86)` nhưng khi chạy thì thư mục thực sự đang chứa các tệp tài nguyên cần thiết cho phần mềm là `MEI179322 nằm ở: C:\Users\Server_Quan_IT\AppData\Local\Temp\_MEI179322`  
+
+![Thư mục MEI](assets/image/MEI_folder.png)
+
+Vì vậy để phần mềm có thể tìm đến các tài nguyên một cách chính xác ta cần thêm hàm sau, hàm này sẽ lấy địa chỉ đang chạy của chương trình một cách chính xác, khi chạy bằng tệp python hoặc khi chạy bằng exe được đóng gói bằng pyinstall:  
+
+```python
+def resource_path(relative_path):
+    """ Trả về đường dẫn đến file tài nguyên khi đóng gói với PyInstaller """
+    try:
+        # Khi chạy ứng dụng từ file .exe
+        base_path = sys._MEIPASS
+    except Exception:
+        # Khi chạy từ mã nguồn Python
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+```
+Sau đó ta thay thế các đoạn mã sử dụng tài nguyên bằng cách sử dụng hàm `resource_path` như sau:  
+
+```python
+json_filename = resource_path("data\\config.json")
+txt_log = resource_path("data\\log.txt")
+self.root.iconbitmap(resource_path("assets\\image\\Update_ico.ico"))
+```
+Và cách thêm các tài nguyên để đóng gói vào `auto-py-to-exe` như sau:
+
+![Thêm file ](image.png)
+
+Chương trình của tôi dùng 3 file, và 3 file đó có đường dẫn như sau: `data\\my_file1`, `data\\my_file2`, `assets\\image\\my_file3`  
+Vì vậy khi ta chọn chức năng `Add Folder` thì ta sẽ chọn folder chứa các tài nguyên của chúng ta là `data`, và `image` thì nó sẽ tự động lấy hết các tệp tin bên trong thư mục đó (vì vậy chỉ bỏ vào các tệp tin cần thiết, nếu không nó sẽ copoy hết các file và gây ra dư thừa và nặng chương trình) và ô kế bên đó phải điền đúng đường dẫn khi ta sử dụng, nếu không sẽ lỗi. Vì vậy ta sẽ điền tương ứng là `assets/image` và `data/` nó sẽ tự tạo 2 thư mục đó và đưa các file cần thiết vào đúng 2 thư mục đó.  
+
+`Advance`: Thường đây sẽ là nơi nhập tên của phần mềm và các thư viện mà đã sử dụng bằng `hidden-import`  
+
+![Nhập tên và thư viện](assets/image/advance_auto_py_to_exe.png)
+
+`Setting`: Chủ yếu dùng để xuất file json hoặc nhập file json cho các lần sau sử dụng lại, không cần điền lại các thông số từ đầu.  
+
+![Nhập hoặc xuát file json để lưu quá trình cấu hình](assets/image/setting_auto_py_to_exe.png)
+
+Sau khi cấu hình hoàn tất thì chọn `Export Config to JSON File` để lưu file này lại cho các lần sử dụng sau.  
+
+Sau đó `import` tệp json đã được chuẩn bị sẵn [tại đây](data/auto-py-to-exe-updater.json). Lưu ý đường dẫn đến các tệp có thể đang bị sai, thay đổi cho phù hợp với thực tế.  
 
 ![Import tệp json vào phần mềm auto py to exe](assets/image/json_exe_use_auto_py_to_exe.png)
 
@@ -26,54 +92,6 @@ Nếu sau khi có exe và chạy, nó báo lỗi `không tìm thấy module xxx`
 
 ![Thêm các thư viện bị thiếu](assets/image/hidden_import.png)
 
-```
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" data-backdrop="static">
+## Một số lỗi khác 
 
-  <div class="modal-dialog" role="document">
-
-    <div class="modal-content">
-
-      <div class="modal-header">
-
-        <h5 class="modal-title" id="exampleModalLabel">Tiêu đề hộp thoại</h5>
-
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-
-          <span aria-hidden="true">&times;</span>
-
-
-
-        </button>
-
-      </div>
-
-      <div class="modal-body">
-
-        Đây là nội dung của hộp thoại.
-
-      </div>
-
-      <div class="modal-footer">
-
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-
-        <button type="button" class="btn btn-primary">Lưu thay đổi</button>
-
-      </div>
-
-    </div>
-
-  </div>
-
-</div>
-----------------
- <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-------------
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
-
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-------------------------------------
-<asp:Button ID="btnShowModal" runat="server" CssClass="btn btn-primary" Text="Hiển thị hộp thoại" OnClientClick="$('#myModal').modal('show'); return false;" />
-```
+Xem thêm một số lỗi khác tại [trang chủ](https://nitratine.net/blog/post/issues-when-using-auto-py-to-exe/#debugging)

@@ -16,8 +16,18 @@ from packaging import version
 import time
 
 
-json_filename = "data/config.json"
-txt_log = "data/log.txt"
+def resource_path(relative_path):
+    """ Trả về đường dẫn đến file tài nguyên khi đóng gói với PyInstaller """
+    try:
+        # Khi chạy ứng dụng từ file .exe
+        base_path = sys._MEIPASS
+    except Exception:
+        # Khi chạy từ mã nguồn Python
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
+json_filename = resource_path("data\\config.json")
+txt_log = resource_path("data\\log.txt")
 
 logger = logging.getLogger()
 # Dòng dưới sẽ ngăn chặn việc có những log không mong muốn từ thư viện PILLOW
@@ -48,8 +58,7 @@ def get_real_app_dir():
     """
     Trả về đường dẫn thực sự của ứng dụng, kể cả khi chạy từ thư mục tạm _MEI khi sử dụng PyInstaller.  
     Khi đóng gói ứng dụng bằng PyInstall, sau đó khởi chạy ứng dụng thì nó sẽ tạo một thư mục tạm, thường bắt đầu bằng _MEIxxxx, để khởi chạy phần mềm  
-    Thư mục tạm nằm ở `C:\Users\Server_Quan_IT\AppData\Local\Temp` thay tên tương ứng, vào đó để xem khi chạy app  
-    Vì vậy nếu sử dụng `os.path.dirname(os.path.abspath(__file__))` thì nó sẽ trả về đường dẫn thư mục tạm chứ không phải thư mục chứa tệp exe: `C:\Program File(x86)\My_app`  
+    Vì vậy nếu sử dụng `os.path.dirname(os.path.abspath(__file__))` thì nó sẽ trả về đường dẫn thư mục tạm chứ không phải thư mục chứa tệp exe: `C:\Program File\My_app`  
     """
     if getattr(sys, 'frozen', False):
         # Ứng dụng đang chạy dưới dạng một file đóng gói bởi PyInstaller thì biến sys.frozen = True
@@ -63,6 +72,7 @@ def get_real_app_dir():
         app_dir = os.path.dirname(os.path.abspath(__file__))
 
         return app_dir
+    
 
 # Đường dẫn ứng dụng chính
 APP_DIR = get_real_app_dir()
@@ -81,7 +91,7 @@ class UpdateApp:
     def __init__(self, root, current_version = "1.0.0"):
         self.root = root
         self.root.title("Cập nhật phần mềm")
-        self.root.iconbitmap("assets/image/Update_ico.ico")
+        self.root.iconbitmap(resource_path("assets\\image\\Update_ico.ico"))
         self.root.geometry("500x300")
         self.root.resizable(False, False)
 

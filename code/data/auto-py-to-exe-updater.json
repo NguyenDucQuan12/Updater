@@ -7,7 +7,7 @@
   },
   {
    "optionDest": "filenames",
-   "value": "D:/Project/Smart_Parking_Sensor/test/test_plc_kv3000.py"
+   "value": "update_gui_api.py"
   },
   {
    "optionDest": "onefile",
@@ -19,7 +19,7 @@
   },
   {
    "optionDest": "icon_file",
-   "value": "D:/Project/Smart_Parking_Sensor/assets/image/App_ico.ico"
+   "value": "assets/image/Update_ico.ico"
   },
   {
    "optionDest": "name",
@@ -59,11 +59,11 @@
   },
   {
    "optionDest": "datas",
-   "value": "D:/Project/Smart_Parking_Sensor/assets/image;image/"
+   "value": "assets/image;assets/image/"
   },
   {
    "optionDest": "datas",
-   "value": "D:/Project/Smart_Parking_Sensor/data;data/"
+   "value": "data;data/"
   },
   {
    "optionDest": "hiddenimports",
