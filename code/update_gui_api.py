@@ -1,5 +1,6 @@
 import requests
 import sys
+import psutil
 import json
 import os
 import hashlib
@@ -35,29 +36,45 @@ logger.setLevel(logging.INFO)
 with open(json_filename, 'r') as inside:
     data = json.load(inside)
 
-    # Địa chỉ API để truy vấn
+    # Cấu hình API
     API_SERVER = data['Update_app']["server"]
     LATEST_VERSION_ENDPOINT = data['Update_app']["api_get_version"]
-    # Tên phần mềm cần cập nhật
     MAIN_APP = data['Update_app']["main_app_name"]
-    # Tên thư mục tạm
     UPDATE_ZIP_NAME = data['Update_app']["update_zip_name"]
-    # Phiên bản hiện tại của phần mềm cần cập nhật
     CURRENT_VERSION = data['Update_app']["current_version"]
 
 
+def get_real_app_dir():
+    """
+    Trả về đường dẫn thực sự của ứng dụng, kể cả khi chạy từ thư mục tạm _MEI khi sử dụng PyInstaller.  
+    Khi đóng gói ứng dụng bằng PyInstall, sau đó khởi chạy ứng dụng thì nó sẽ tạo một thư mục tạm, thường bắt đầu bằng _MEIxxxx, để khởi chạy phần mềm  
+    Thư mục tạm nằm ở `C:\Users\Server_Quan_IT\AppData\Local\Temp` thay tên tương ứng, vào đó để xem khi chạy app  
+    Vì vậy nếu sử dụng `os.path.dirname(os.path.abspath(__file__))` thì nó sẽ trả về đường dẫn thư mục tạm chứ không phải thư mục chứa tệp exe: `C:\Program File(x86)\My_app`  
+    """
+    if getattr(sys, 'frozen', False):
+        # Ứng dụng đang chạy dưới dạng một file đóng gói bởi PyInstaller thì biến sys.frozen = True
+        app_dir = sys._MEIPASS  # Trả về thư mục tạm _MEI
+
+        # Trả về thư mục của ứng dụng thực thi (có thể là Program Files)
+        return os.path.dirname(os.path.abspath(sys.executable))
+    
+    else:
+        # Khi chạy trực tiếp từ mã nguồn Python (không phải PyInstaller)
+        app_dir = os.path.dirname(os.path.abspath(__file__))
+
+        return app_dir
+
 # Đường dẫn ứng dụng chính
-APP_DIR = os.path.dirname(os.path.abspath(__file__))
+APP_DIR = get_real_app_dir()
 APP_EXE_PATH = os.path.join(APP_DIR, MAIN_APP)
-# Đường dẫn đến thư mục tạm, là thư mục chứa file zip để tải về, xong sẽ tự xóa
 UPDATE_ZIP_PATH = os.path.join(APP_DIR, UPDATE_ZIP_NAME)
 
 # @main_requires_admin
 class UpdateApp:
     """
-    Ứng dụng cập nhật phần mềm cho một `ứng dụng khác`, cần đặt ứng dụng này cùng vị trí thư mục với ứng dụng chính  
+    Ứng dụng cập nhật phần mềm cho một `ứng dụng khác`, cần đặt ứng dụng này cùng vị trí với ứng dụng chính  
     Khi ứng dụng chính được cài đặt trong thư mục `Program Files` trên `Windows`, việc ghi đè tệp trong thư mục này yêu cầu quyền quản trị viên, vì vậy cần chạy ứng dụng này với quyền quản trị viên  
-    Phần mềm này `(updater)` sẽ được phần mềm chính gọi khi có bản cập nhật mới từ server  
+    Phần mềm này `(updater)` sẽ được phần mềm chính gọi và chạy trong nền để kiểm tra xem có bản cập nhật nào mới từ server hay không  
     `Updater` sẽ truy vấn thông tin từ thư mục `data/config.json` để lấy các thông tin cần thiết và tải về một tệp `zip` chứa `file exe`, `thư mục`, `tệp tin` khác cần thiết để thay thế cho các tệp tin cũ  
     Sau khi `ghi đè` các tệp tin cũ thì `Updater` tự động xóa tệp zip đã tải về và khởi chạy phần mềm chính   
     """
@@ -66,11 +83,9 @@ class UpdateApp:
         self.root.title("Cập nhật phần mềm")
         self.root.iconbitmap("assets/image/Update_ico.ico")
         self.root.geometry("500x300")
-        # Không cho người dùng thay đổi kích thước phần mềm
         self.root.resizable(False, False)
 
-        # Lấy phiên bản hiện tại của phần mềm
-        self.current_version = current_version
+        self.current_version =current_version
 
         # Các thành phần giao diện
         self.file_label = tk.Label(root, text="File: Chưa tải", font=("Arial", 10))
@@ -120,14 +135,15 @@ class UpdateApp:
         if calculated_checksum == expected_checksum:
             return True
         else:
-            print(f"Checksum tính toán: {calculated_checksum}")
-            print(f"Checksum mong đợi: {expected_checksum}")
+            logger.info(f"Checksum tính toán: {calculated_checksum}")
+            logger.info(f"Checksum mong đợi: {expected_checksum}")
             return False
 
     def download_file(self, url, save_path, progress_callback=None, speed_callback=None):
         """
         Tải về tệp tin từ URL với hỗ trợ cập nhật tiến trình và tốc độ tải.
         """
+        logger.info(f"Tải tệp tin từ server và lưu vào: {save_path}")
         try:
             with requests.get(url, stream=True) as r:
                 r.raise_for_status()
@@ -149,7 +165,7 @@ class UpdateApp:
                             speed_callback(f"{speed:.2f} KB/s")
             return True
         except Exception as e:
-            print(f"Error downloading file: {e}")
+            logger.error(f"Error downloading file: {e}")
             return False
 
     def extract_zip(self, zip_path, extract_to, progress_callback=None):
@@ -169,7 +185,7 @@ class UpdateApp:
                         progress_callback(percent)
             return True
         except Exception as e:
-            print(f"Error extracting zip file: {e}")
+            logger.error(f"Error extracting zip file: {e}")
             return False
 
     def launch_app(self):
@@ -277,6 +293,19 @@ class UpdateApp:
             # messagebox.showinfo("Thông Báo", "Bạn đang sử dụng phiên bản mới nhất.")
             self.close_updater()
 
+    def close_main_app():
+        """Đóng ứng dụng chính nếu nó đang chạy"""
+        try:
+            for proc in psutil.process_iter():
+                if MAIN_APP in proc.name():
+                    proc.terminate()
+                    proc.wait(timeout=5)  # Đợi quá trình dừng hẳn trong 5 giây
+                    return True
+        except Exception as e:
+            logger.error(f"Không thể đóng ứng dụng chính: {e}")
+            return False
+        return True
+
 if __name__ == "__main__":
     "Để chạy Updater với quyền quản trị, ta sử dụng 2 thư viện là pywin32 và pyuac: pip install pypiwin32 và pip install pyuac"
     """
@@ -290,6 +319,9 @@ if __name__ == "__main__":
     if __name__ == "__main__":
         main()
     """
+    # root = tk.Tk()
+    # app = UpdateApp(root, current_version= CURRENT_VERSION)
+    # root.mainloop()
 
     """
     Cách 2: Gọi trực tiếp quyền admin ngay từ ban đầu. Kiểm tra xem phần mềm có chạy với quyền admin không, nếu không thì chạy lại với quyền admin
