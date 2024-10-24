@@ -26,8 +26,8 @@ def resource_path(relative_path):
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
 
-json_filename = resource_path("data\\config.json")
-txt_log = resource_path("data\\log.txt")
+json_filename = "data\\config.json"
+txt_log = "data\\log.txt"
 
 logger = logging.getLogger()
 # Dòng dưới sẽ ngăn chặn việc có những log không mong muốn từ thư viện PILLOW
@@ -93,7 +93,7 @@ class UpdateApp:
         self.root.title("Cập nhật phần mềm")
         self.root.iconbitmap(resource_path("assets\\image\\Update_ico.ico"))
         self.root.geometry("500x300")
-        self.root.resizable(False, False)
+        self.root.resizable(True, True)  # Cho phép cửa sổ có thể thay đổi kích thước
 
         self.current_version =current_version
 
@@ -101,7 +101,7 @@ class UpdateApp:
         self.file_label = tk.Label(root, text="File: Chưa tải", font=("Arial", 10))
         self.file_label.pack(pady=5)
 
-        self.note_label = tk.Label(root, text="Nội dung phiên bản mới", font=("Arial", 10))
+        self.note_label = tk.Label(root, text="Nội dung phiên bản mới", font=("Arial", 10), wraplength=480, justify="left")
         self.note_label.pack(pady=5)
 
         self.speed_label = tk.Label(root, text="Speed: 0 KB/s", font=("Arial", 10))
@@ -118,6 +118,8 @@ class UpdateApp:
         self.extract_progress.pack(pady=10)
         # self.extract_progress.pack_forget()  # Ẩn thanh tiến trình giải nén ban đầu
 
+        self.get_information_from_server()
+
         self.status_label = tk.Label(root, text="Nhấn 'Start' để bắt đầu cập nhật.", font=("Arial", 10))
         self.status_label.pack(pady=5)
 
@@ -126,6 +128,44 @@ class UpdateApp:
 
         # Khi đóng chương trình bằng nút "X" thì chạy hàm on_closing
         self.root.protocol("WM_DELETE_WINDOW", self.close_updater)
+
+    def adjust_window_size(self):
+        """
+        Điều chỉnh kích thước cửa sổ dựa trên nội dung của `note_label`.
+        """
+        self.root.update_idletasks()
+        self.root.geometry(f"{self.note_label.winfo_width() + 100}x{self.note_label.winfo_height() + 300}")
+
+    def get_information_from_server(self):
+
+        # Lấy thông tin phiên bản mới nhất
+        try:
+            response = requests.get(LATEST_VERSION_ENDPOINT)
+            response.raise_for_status()
+
+            # Lấy thông tin nội dung từ api
+            version_info = response.json()
+            # Lấy thông tin phiên bản mới nhất
+            self.latest_version = version_info.get("latest_version")
+            # Lấy địa chỉ api để download tệp zip chứa file exe và các thư mục khác đi kèm
+            self.download_url = version_info.get("download_url")
+            # Lấy thông tin nội dung của phiên bản cập nhật
+            release_notes = version_info.get("release_notes")
+            # Lấy thông tin checksum của tệp zip, để đổi chiếu sau khi tải xong có trùng hay không
+            self.expected_checksum = version_info.get("checksum")
+
+            # Hiển thị tên tệp và nội dung cập nhật mới
+            # long_text = "Đây là nội dung cập nhật rất dài. " * 10
+            self.file_label.config(text=f"File: {UPDATE_ZIP_NAME} Version: {self.latest_version}")
+            self.note_label.config(text=release_notes)
+
+            # Điều chỉnh kích thước cửa sổ sau khi đặt nội dung dài
+            self.adjust_window_size()
+
+        except Exception as e:
+            messagebox.showerror("Lỗi", f"Không thể tìm thấy phiên bản mới: {e}")
+            self.close_updater()
+            return
 
     def calculate_checksum(self, file_path):
         """
@@ -218,35 +258,13 @@ class UpdateApp:
         """
         Bắt đầu quá trình cập nhật trong một luồng riêng.
         """
-        threading.Thread(target=self.start_update, args=(self.current_version,), daemon=True).start()
+        
+        threading.Thread(target=self.start_update, args=(self.current_version, self.latest_version, self.download_url, self.expected_checksum), daemon=True).start()
 
-    def start_update(self, current_version):
+    def start_update(self, current_version, latest_version, download_url, expected_checksum):
         """
         Quá trình cập nhật chính: kiểm tra phiên bản, tải về, kiểm tra checksum, giải nén và khởi động ứng dụng mới.
         """
-        # Lấy thông tin phiên bản mới nhất
-        try:
-            response = requests.get(LATEST_VERSION_ENDPOINT)
-            response.raise_for_status()
-
-            # Lấy thông tin nội dung từ api
-            version_info = response.json()
-            # Lấy thông tin phiên bản mới nhất
-            latest_version = version_info.get("latest_version")
-            # Lấy địa chỉ api để download tệp zip chứa file exe và các thư mục khác đi kèm
-            download_url = version_info.get("download_url")
-            # Lấy thông tin nội dung của phiên bản cập nhật
-            release_notes = version_info.get("release_notes")
-            # Lấy thông tin checksum của tệp zip, để đổi chiếu sau khi tải xong có trùng hay không
-            expected_checksum = version_info.get("checksum")
-
-            # Hiển thị tên tệp và nội dung cập nhật mới
-            self.file_label.config(text=f"File: {UPDATE_ZIP_NAME}")
-            self.note_label.config(text= release_notes)
-        except Exception as e:
-            messagebox.showerror("Lỗi", f"Không thể tìm thấy phiên bản mới: {e}")
-            self.close_updater()
-            return
 
         if version.parse(latest_version) > version.parse(current_version):
             self.status_label.config(text=f"Đang tải về phiên bản: {latest_version} ...")

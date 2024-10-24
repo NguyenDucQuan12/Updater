@@ -7,7 +7,7 @@
   },
   {
    "optionDest": "filenames",
-   "value": "update_gui_api.py"
+   "value": "D:/Project/Smart_Parking_Sensor/test/test_plc_kv3000.py"
   },
   {
    "optionDest": "onefile",
@@ -19,7 +19,7 @@
   },
   {
    "optionDest": "icon_file",
-   "value": "assets/image/Update_ico.ico"
+   "value": "D:/Project/Smart_Parking_Sensor/assets/image/Update_ico.ico"
   },
   {
    "optionDest": "name",
@@ -58,14 +58,6 @@
    "value": false
   },
   {
-   "optionDest": "datas",
-   "value": "assets/image;assets/image/"
-  },
-  {
-   "optionDest": "datas",
-   "value": "data;data/"
-  },
-  {
    "optionDest": "hiddenimports",
    "value": "pyuac"
   },
@@ -80,6 +72,14 @@
   {
    "optionDest": "hiddenimports",
    "value": "tkinter.messagebox"
+  },
+  {
+   "optionDest": "hiddenimports",
+   "value": "psutil"
+  },
+  {
+   "optionDest": "datas",
+   "value": "D:/Project/Smart_Parking_Sensor/assets/image/Update_ico.ico;assets/image/"
   }
  ],
  "nonPyinstallerOptions": {
