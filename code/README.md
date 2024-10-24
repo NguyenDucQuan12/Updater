@@ -68,6 +68,8 @@ Và cách thêm các tài nguyên để đóng gói vào `auto-py-to-exe` như s
 Chương trình của tôi dùng 3 file, và 3 file đó có đường dẫn như sau: `data\\my_file1`, `data\\my_file2`, `assets\\image\\my_file3`  
 Vì vậy khi ta chọn chức năng `Add Folder` thì ta sẽ chọn folder chứa các tài nguyên của chúng ta là `data`, và `image` thì nó sẽ tự động lấy hết các tệp tin bên trong thư mục đó (vì vậy chỉ bỏ vào các tệp tin cần thiết, nếu không nó sẽ copy hết các file và gây ra dư thừa và nặng chương trình sau khi đóng gói) và ô kế bên đó phải điền đúng đường dẫn khi ta sử dụng, nếu không sẽ lỗi. Vì vậy ta sẽ điền tương ứng là `assets/image` và `data/` nó sẽ tự tạo 2 thư mục đó và đưa các file cần thiết vào đúng 2 thư mục đó.  
 
+### Mình sẽ không additional file data vào, vì chương trình của mình có địa chỉ api không cố định, nó sẽ thay đổi thường xuyên nên cần để file này nằm ở thư mục bên ngoài, để dễ dàng thay đổi. Mình làm theo cách 0 ở mục lưu ý, hoặc import json mẫu để xem chi tiết.  
+
 `Advance`: Thường đây sẽ là nơi nhập tên của phần mềm và các thư viện mà đã sử dụng bằng `hidden-import`  
 
 ![Nhập tên và thư viện](assets/image/advance_auto_py_to_exe.png)
@@ -78,7 +80,7 @@ Vì vậy khi ta chọn chức năng `Add Folder` thì ta sẽ chọn folder ch�
 
 Sau khi cấu hình hoàn tất thì chọn `Export Config to JSON File` để lưu file này lại cho các lần sử dụng sau.  
 
-Sau đó `import` tệp json đã được chuẩn bị sẵn [tại đây](data/auto-py-to-exe-updater.json). Lưu ý đường dẫn đến các tệp có thể đang bị sai, thay đổi cho phù hợp với thực tế.  
+Sau đó `import` tệp json đã được chuẩn bị sẵn [tại đây](data/auto-py-to-exe-updater.json). **Lưu ý đường dẫn đến các tệp tin hình ảnh, json đang không khớp, thay đổi cho phù hợp với thực tế**.  
 
 ![Import tệp json vào phần mềm auto py to exe](assets/image/json_exe_use_auto_py_to_exe.png)
 
