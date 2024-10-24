@@ -102,7 +102,31 @@ Sau khi có file exe thì ta copy 2 thư mục này vào cùng vị trí với e
 
 ![Thêm file thủ công](assets/image/not_use_add_file.png)
 
-## 1. Lỗi nhận diện nhầm virus
+## 1. Thêm thư viện bằng addition file
+Khi chuyển đổi file `python` thành `exe` sẽ gặp lỗi như `ModuleNotFound: No module named 'xxx'`  
+
+![Lỗi thiếu thư viện](assets/image/modul_not_found.png)
+
+Ta có thể thấy rằng nó đang báo thiếu thư viện `xxx`.  
+Nếu thư viện `xxx` của bạn được cài đặt bằng `pip` thì sử dụng `--hidden-import` để thêm thư viện đó. Ví dụ như `cv2`, `PIL`, `PIL.Image`, ...  
+
+![alt text](assets/image/hidden_import_library.png)
+
+Còn nếu bạn tạo các `tệp py` và xem nó như một module và import nó như ví dụ dưới đây:  
+
+![alt text](assets/image/py_module.png)
+
+Ta có thể thấy các hàm được import vào thông qua các thư mục và file py. Tôi có cấu trúc thư mục như sau:  
+
+![alt text](assets/image/tree_folder.png)
+
+`src/gui/gui_information.py` nhưng trong chương trình của tôi lại sử dụng câu lệnh import `from gui.gui_information import tk_information` nên tôi cũng phải thêm file tương tự như vậy và tạo thư mục `gui` chứ không phải tạo thư mục `src/gui`.  
+
+![alt text](assets/image/additon_file_module.png)
+
+Nếu có câu lệnh nào sử dụn đường dẫn `src/gui/config.py` thì ta cũng thêm vào và tạo thêm 1 thư mục `src/gui/` là được.  
+
+## 2. Lỗi nhận diện nhầm virus
 `Window defender` có thể nhận nhầm đây là 1 phần mềm có chứa `virus` nên khi tạo thành file exe thì ngay lập tức bị xóa, vì vậy khi nó hiển thị thông báo phát hiện virus thì nhanh chóng ấn vào đó và cho phép nó chạy, thì file exe sẽ không bị xóa.  
 
 ## 2. Thiếu thư viện  
