@@ -26,6 +26,9 @@ Tiếp theo ta sẽ chọn các thông tin cần thiết để cung cấp cho ph
 
 Trong chương trình này, chúng ta sử dụng các file: `data\\config.json`, `data\\log.txt `, `assets\\image\\Update_ico.ico `  
 
+> Khi sử dụng file thì ta sử dụng đường dẫn có 2 dấu gạch chéo nha: \\  
+> Không sử dụng: / hay \  
+
 ```python
 json_filename = "data\\config.json"
 txt_log = "data\\log.txt"
