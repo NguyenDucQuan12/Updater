@@ -66,7 +66,7 @@ Và cách thêm các tài nguyên để đóng gói vào `auto-py-to-exe` như s
 ![Thêm file ](assets/image/add_file_to_au_to_py_to_exe.png)
 
 Chương trình của tôi dùng 3 file, và 3 file đó có đường dẫn như sau: `data\\my_file1`, `data\\my_file2`, `assets\\image\\my_file3`  
-Vì vậy khi ta chọn chức năng `Add Folder` thì ta sẽ chọn folder chứa các tài nguyên của chúng ta là `data`, và `image` thì nó sẽ tự động lấy hết các tệp tin bên trong thư mục đó (vì vậy chỉ bỏ vào các tệp tin cần thiết, nếu không nó sẽ copy hết các file và gây ra dư thừa và nặng chương trình sau khi đóng gói) và ô kế bên đó phải điền đúng đường dẫn khi ta sử dụng, nếu không sẽ lỗi. Vì vậy ta sẽ điền tương ứng là `assets/image` và `data/` nó sẽ tự tạo 2 thư mục đó và đưa các file cần thiết vào đúng 2 thư mục đó.  
+Vì vậy khi ta chọn chức năng `Add Folder` thì ta sẽ chọn folder chứa các tài nguyên của chúng ta là `data`, và `image` thì nó sẽ tự động lấy hết các tệp tin bên trong thư mục đó (vì vậy chỉ bỏ vào các tệp tin cần thiết, nếu không nó sẽ copy hết các file và gây ra dư thừa và nặng chương trình sau khi đóng gói) và ô kế bên đó phải điền đúng đường dẫn khi ta sử dụng, nếu không sẽ lỗi. Vì vậy ta sẽ điền tương ứng là `assets/image/` và `data/` nó sẽ tự tạo 2 thư mục đó và đưa các file cần thiết vào đúng 2 thư mục đó.  
 
 ### Mình sẽ không additional file data vào, vì chương trình của mình có địa chỉ api không cố định, nó sẽ thay đổi thường xuyên nên cần để file này nằm ở thư mục bên ngoài, để dễ dàng thay đổi. Mình làm theo cách 0 ở mục lưu ý, hoặc import json mẫu để xem chi tiết.  
 
@@ -92,7 +92,7 @@ Sau khi hoàn thành thì vào thư mục `output` tương ứng sẽ thấy m�
 
 ## 0. Không thêm tệp vào exe
 Có một số trường hợp ta không nên sử dụng `Additional Files`:  
-Chúng ta có 1 tệp `json` chứa các thiết lập ban đầu như `địa chỉ api`, ` tên phần mềm`, ... đây là những thông số có thể thay đổi thường xuyên, vì vậy ta không thêm nó trực tiếp vào exe, mà để nớ ở cùng thư mục exe để nó dễ dàng truy cập và ta cũng dễ dàng chỉnh sửa tệp này.  
+Chúng ta có 1 tệp `json` chứa các thiết lập ban đầu như `địa chỉ api`, `tệp ngôn ngữ`, ... đây là những thông số có thể thay đổi thường xuyên, vì vậy ta không thêm nó trực tiếp vào exe, mà để nó ở cùng thư mục chứa tệp thực thi `exe` để nó dễ dàng truy cập và ta cũng dễ dàng chỉnh sửa tệp này.  
 Khi đó ta sẽ không sử dụng hàm `resource_path` để đọc tệp tin mà sẽ đọc trực tiếp, còn các file khác mà cần thì vẫn đọc bằng `resource_path` như bình thường và `phải thêm vào additon file`:  
 
 ```python
@@ -104,7 +104,7 @@ Sau khi có file exe thì ta copy 2 thư mục này vào cùng vị trí với e
 
 ![Thêm file thủ công](assets/image/not_use_add_file.png)
 
-## 1. Thêm thư viện bằng addition file
+## 1. Lỗi không tìm thấy thư viện
 Khi chuyển đổi file `python` thành `exe` sẽ gặp lỗi như `ModuleNotFound: No module named 'xxx'`  
 
 ![Lỗi thiếu thư viện](assets/image/modul_not_found.png)
@@ -122,19 +122,14 @@ Ta có thể thấy các hàm được import vào thông qua các thư mục v�
 
 ![alt text](assets/image/tree_folder.png)
 
-`src/gui/gui_information.py` nhưng trong chương trình của tôi lại sử dụng câu lệnh import `from gui.gui_information import tk_information` nên tôi cũng phải thêm file tương tự như vậy và tạo thư mục `gui` chứ không phải tạo thư mục `src/gui`.  
+Ta chỉ cần thêm tệp tin `__init__.py` thì khi đóng gói nó sẽ tự động tìm kiếm các module này và thêm vào. Và lưu ý:  
 
-![alt text](assets/image/additon_file_module.png)
+> Thư mục gốc không có tệp tin __init__.py, chỉ có những thư mục nòa chứa tệp tin mà được import thì mới có  
+> Như ảnh trên thì thư mục gốc (thư mục chứa tệp main.py) đang có tệp tin __init__.py, ta cần xóa bỏ nó trước khi chạy đóng gói  
 
-Nếu có câu lệnh nào sử dụn đường dẫn `src/gui/config.py` thì ta cũng thêm vào và tạo thêm 1 thư mục `src/gui/` là được.  
 
 ## 2. Lỗi nhận diện nhầm virus
 `Window defender` có thể nhận nhầm đây là 1 phần mềm có chứa `virus` nên khi tạo thành file exe thì ngay lập tức bị xóa, vì vậy khi nó hiển thị thông báo phát hiện virus thì nhanh chóng ấn vào đó và cho phép nó chạy, thì file exe sẽ không bị xóa.  
-
-## 2. Thiếu thư viện  
-Nếu sau khi có exe và chạy, nó báo lỗi `không tìm thấy module xxx` thì có nghĩa là đang không tìm thấy thư viện `xxx`, cần import nó vào mục `Advanced/hidden import`  
-
-![Thêm các thư viện bị thiếu](assets/image/hidden_import.png)
 
 ## Một số lỗi khác 
 
