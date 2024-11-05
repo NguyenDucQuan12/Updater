@@ -99,9 +99,12 @@ Chúng ta có 1 tệp `json` chứa các thiết lập ban đầu như `địa c
 Khi đó ta sẽ không sử dụng hàm `resource_path` để đọc tệp tin mà sẽ đọc trực tiếp, còn các file khác mà cần thì vẫn đọc bằng `resource_path` như bình thường và `phải thêm vào additon file`:  
 
 ```python
+# Hai file này thay đổi thwuongf xuyên nên không thêm vào exe
 json_filename = "data\\config.json"
 txt_log = "data\\log.txt"
-self.root.iconbitmap("assets\\image\\Update_ico.ico")
+
+# icon phần mềm sẽ là vĩnh viễn hay không thay đổi thường xuyên nên sẽ thêm hàm reource_path để thêm nó vào exe
+self.root.iconbitmap(resource_path("assets\\image\\Update_ico.ico"))
 ```
 Sau khi có file exe thì ta copy 2 thư mục này vào cùng vị trí với exe. Để nó có thể tìm được các tệp này.  
 
