@@ -14,7 +14,14 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from packaging import version
 import time
+import datetime
 
+today = str(datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")) #chua ngay thang nam cung voi gio phut giay
+date_today = str(datetime.datetime.now().strftime("%d-%m-%y")) # chỉ chứa ngày tháng năm
+
+
+# Lấy đường dẫn đến thư mục AppData/Roaming của người dùng
+appdata_dir = os.getenv('APPDATA')
 
 def resource_path(relative_path):
     """ Trả về đường dẫn đến file tài nguyên khi đóng gói với PyInstaller """
@@ -27,20 +34,6 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 json_filename = "data\\config.json"
-txt_log = "data\\log.txt"
-
-logger = logging.getLogger()
-# Dòng dưới sẽ ngăn chặn việc có những log không mong muốn từ thư viện PILLOW
-# ví dụ: 2020-12-16 15:21:30,829 - DEBUG - PngImagePlugin - STREAM b'PLTE' 41 768
-logging.getLogger("PIL.PngImagePlugin").propagate = False
-
-logging.basicConfig(filename=txt_log, filemode= 'a',
-                    format='%(asctime)s %(levelname)s:\t %(filename)s: %(funcName)s()-Line: %(lineno)d\t message: %(message)s',
-                    datefmt='%d/%m/%Y %I:%M:%S %p', encoding = 'utf-8', force=True)
-
-# Mức độ lưu nhật ký, DEBUG chỉ dành cho trong quá trình DEBUG, nếu không sẽ có nhiều log thừa thãi
-logger.setLevel(logging.INFO)
-
 
 # Lấy các thông tin ban đầu để khởi tạo cho phần mềm
 with open(json_filename, 'r') as inside:
@@ -53,6 +46,11 @@ with open(json_filename, 'r') as inside:
     UPDATE_ZIP_NAME = data['Update_app']["update_zip_name"]
     CURRENT_VERSION = data['Update_app']["current_version"]
 
+# Tạo thư mục nhật kí trong Roaming theo ngày tháng năm, nếu thư mục đã tồn tại thì không tạo nữa
+save_dir_log = os.path.join(appdata_dir, "SmartParking", "update", date_today)
+os.makedirs(save_dir_log, exist_ok=True)
+
+log_file_path = os.path.join(save_dir_log, "log.txt")
 
 def get_real_app_dir():
     """
@@ -73,7 +71,6 @@ def get_real_app_dir():
 
         return app_dir
     
-
 # Đường dẫn ứng dụng chính
 APP_DIR = get_real_app_dir()
 APP_EXE_PATH = os.path.join(APP_DIR, MAIN_APP)
@@ -335,6 +332,7 @@ class UpdateApp:
         return True
 
 if __name__ == "__main__":
+
     "Để chạy Updater với quyền quản trị, ta sử dụng 2 thư viện là pywin32 và pyuac: pip install pypiwin32 và pip install pyuac"
     """
     Cách 1: Sử dụng trình trang trí `decorator` thì mặc định khi gọi hàm đó sẽ yêu cầu quyền quản trị viên, có thể sử dụng `decorator` cho class:
@@ -357,7 +355,21 @@ if __name__ == "__main__":
     try:
         if not pyuac.isUserAdmin():
             pyuac.runAsAdmin()
-        else:        
+        else:
+
+            logger = logging.getLogger()
+            # Dòng dưới sẽ ngăn chặn việc có những log không mong muốn từ thư viện PILLOW
+            # ví dụ: 2020-12-16 15:21:30,829 - DEBUG - PngImagePlugin - STREAM b'PLTE' 41 768
+            logging.getLogger("PIL.PngImagePlugin").propagate = False
+
+            logging.basicConfig(filename=log_file_path, filemode= 'a',
+                                format='%(asctime)s %(levelname)s:\t %(filename)s: %(funcName)s()-Line: %(lineno)d\t message: %(message)s',
+                                datefmt='%d/%m/%Y %I:%M:%S %p', encoding = 'utf-8', force=True)
+
+            # Mức độ lưu nhật ký, DEBUG chỉ dành cho trong quá trình DEBUG, nếu không sẽ có nhiều log thừa thãi
+            logger.setLevel(logging.INFO)
+
+
             root = tk.Tk()
             app = UpdateApp(root, current_version= CURRENT_VERSION)
             root.mainloop()
